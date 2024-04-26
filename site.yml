@@ -1,0 +1,43 @@
+---
+- hosts: all
+  become: yes
+  vars_files:
+    - secrets.yml
+  
+  tasks:
+    - name: Ensure sudo package is installed.
+      ansible.builtin.package:
+        name: sudo
+        state: present
+
+    - name: Create user
+      ansible.builtin.user:
+        name: "{{ service_user }}"
+        password: "{{ service_user_password | password_hash('sha512') }}"
+        create_home: yes
+        groups:
+            - "{{ 'sudo' if ansible_os_family == 'Debian' else 'wheel' }}"
+
+    - name: Add service_user to sudo configuration
+      ansible.builtin.copy:
+        content: "{{ service_user }} ALL=(ALL) NOPASSWD:ALL"
+        dest: "/etc/sudoers.d/{{ service_user }}"
+        owner: root
+        group: root
+        mode: '0440'
+
+    - name: Create .ssh directory
+      ansible.builtin.file:
+        path: "/home/{{ service_user }}/.ssh"
+        state: directory
+        owner: "{{ service_user }}"
+        group: "{{ service_user }}"
+        mode: '0700'
+
+    - name: Copy SSH key to remote
+      ansible.builtin.copy:
+        src: ~/.ssh/id_rsa.pub
+        dest: /home/{{ service_user }}/.ssh/authorized_keys
+        owner: "{{ service_user }}"
+        group: "{{ service_user }}"
+        mode: '0600'

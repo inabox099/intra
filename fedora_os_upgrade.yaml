@@ -1,0 +1,26 @@
+---
+- name: Fedora OS Upgrade
+  hosts: fedora
+  become: true
+
+  tasks:
+    - name: Install dependencies
+      ansible.builtin.dnf:
+        name: dnf-plugin-system-upgrade
+        state: installed
+
+    - name: Upgrade to latest packages first
+      ansible.builtin.command:
+        cmd: dnf upgrade --refresh -y
+
+    - name: Cleanup package cache
+      ansible.builtin.command:
+        cmd: dnf clean all
+
+    - name: Download Fedora release
+      ansible.builtin.command:
+        cmd: dnf system-upgrade download --releasever={{ fedora_release|default(40) }} -y --allowerasing
+
+    - name: System Upgrade reboot
+      ansible.builtin.command:
+        cmd: dnf system-upgrade reboot

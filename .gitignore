@@ -1,0 +1,5 @@
+inventory
+vault.yml
+vault-password-file
+secrets.yml
+.vscode/

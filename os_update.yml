@@ -1,0 +1,11 @@
+---
+- name: Update all packages on target hosts
+  hosts: all
+  become: true
+
+  tasks:
+  - name: Install the latest packages
+    ansible.builtin.package:
+      name: "*"
+      state: latest
+      update_cache: yes
