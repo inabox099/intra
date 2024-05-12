@@ -1,0 +1,14 @@
+---
+- name: Manage ClickHouse configuration
+  hosts: docker
+  become: true
+
+  tasks:
+
+    - name: Copy config.xml file
+      ansible.builtin.copy:
+        src: config.xml
+        dest: /opt/files/clickhouse/config.xml
+        mode: '0644'
+
+...

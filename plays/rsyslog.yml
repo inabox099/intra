@@ -1,0 +1,22 @@
+---
+- name: Configure remote syslog server
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install rsyslog package
+      apt:
+        name: rsyslog
+        state: present
+
+    - name: Configure rsyslog
+      template:
+        src: syslog.conf.j2
+        dest: /etc/rsyslog.conf
+      notify: restart rsyslog
+
+  handlers:
+    - name: restart rsyslog
+      service:
+        name: rsyslog
+        state: restarted

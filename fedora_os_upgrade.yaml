@@ -4,23 +4,32 @@
   become: true
 
   tasks:
-    - name: Install dependencies
-      ansible.builtin.dnf:
-        name: dnf-plugin-system-upgrade
-        state: installed
-
-    - name: Upgrade to latest packages first
+    - name: Get current Fedora release
       ansible.builtin.command:
-        cmd: dnf upgrade --refresh -y
+        cmd: cat /etc/fedora-release
+      register: current_release
 
-    - name: Cleanup package cache
-      ansible.builtin.command:
-        cmd: dnf clean all
+    - name: Set fact for current Fedora release
+      ansible.builtin.set_fact:
+        current_fedora_release: "{{ current_release.stdout_lines[0].split()[-2] }}"
+      when: current_release.stdout_lines[0] is defined
 
-    - name: Download Fedora release
-      ansible.builtin.command:
-        cmd: dnf system-upgrade download --releasever={{ fedora_release|default(40) }} -y --allowerasing
+    - block:
 
-    - name: System Upgrade reboot
-      ansible.builtin.command:
-        cmd: dnf system-upgrade reboot
+        - name: Upgrade to latest packages first
+          ansible.builtin.command:
+            cmd: dnf upgrade --refresh -y
+
+        - name: Cleanup package cache
+          ansible.builtin.command:
+            cmd: dnf clean all
+
+        - name: Download Fedora release
+          ansible.builtin.command:
+            cmd: dnf system-upgrade download --releasever={{ fedora_release|default(40) }} -y --allowerasing
+
+        - name: System Upgrade reboot
+          ansible.builtin.command:
+            cmd: dnf system-upgrade reboot
+
+      when: current_fedora_release|int() < fedora_release|default(40)

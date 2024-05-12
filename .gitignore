@@ -3,3 +3,7 @@ vault.yml
 vault-password-file
 secrets.yml
 .vscode/
+*.tfstate
+*.backup
+*.hcl
+.terraform/

@@ -1,0 +1,23 @@
+---
+- name: Manage Docker daemon configuration
+  hosts: docker
+  become: true
+
+  tasks:
+    - name: Install Docker packages
+      ansible.builtin.package:
+        name: docker-ce
+        state: present
+
+    - name: Copy daemon.json file
+      ansible.builtin.copy:
+        src: daemon.json
+        dest: /etc/docker/daemon.json
+        mode: '0644'
+
+    - name: Restart Docker service
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+        enabled: true
+...

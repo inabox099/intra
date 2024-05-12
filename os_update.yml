@@ -4,8 +4,22 @@
   become: true
 
   tasks:
+  - name: Set OS family as fact
+    ansible.builtin.set_fact:
+      os_family: "{{ ansible_facts['os_family'] }}"
+  
+  - name: Print OS family
+    ansible.builtin.debug:
+      var: os_family
+      
   - name: Install the latest packages
     ansible.builtin.package:
       name: "*"
       state: latest
       update_cache: yes
+    when: os_family != "Archlinux"
+
+  - name: Install the latest packages on Archlinux
+    ansible.builtin.command:
+        cmd: pacman -Syu --noconfirm
+    when: os_family == "Archlinux"
