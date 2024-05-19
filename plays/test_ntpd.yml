@@ -1,0 +1,33 @@
+---
+- name: Test Sync time and install NTP
+  hosts: test_hosts
+  become: true
+  tasks:
+    - name: Check if NTP package is installed
+      ansible.builtin.package_facts:
+        manager: auto
+      register: package_facts
+
+    - name: Assert NTP package is installed
+      assert:
+        that:
+          - "'ntp' in package_facts.packages"
+
+    - name: Check if NTP service is enabled and started
+      ansible.builtin.service_facts:
+        name: ntp
+      register: service_facts
+
+    - name: Assert NTP service is enabled
+      assert:
+        that:
+          - service_facts.services.ntp.enabled
+
+    - name: Assert NTP service is started
+      ansible.builtin.assert:
+        that:
+          - service_facts.services.ntp.state == 'started'
+      assert:
+        that:
+          - service_facts.services.ntp.state == 'started'
+...

@@ -1,0 +1,21 @@
+---
+- name: Sync time and install NTP
+  hosts: routers
+  become: true
+
+  tasks:
+    - name: Install NTP package
+      ansible.builtin.package:
+        name: ntp
+        state: latest
+
+    - name: Synchronize time
+      ansible.builtin.cmd:
+        cmd: pkill ntpd && ntpdate pool.ntp.org
+
+    - name: Enable NTP service
+      service:
+        name: ntp
+        state: started
+        enabled: true
+
