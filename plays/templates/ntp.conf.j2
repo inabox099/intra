@@ -1,0 +1,27 @@
+# Orphan mode in case of network failure
+tos orphan 15
+
+
+# Associate to Arch's NTP pool
+server 0.arch.pool.ntp.org
+server 1.arch.pool.ntp.org
+server 2.arch.pool.ntp.org
+server 3.arch.pool.ntp.org
+
+# By default, the server allows:
+# - all queries from the local host
+# - only time queries from remote hosts, protected by rate limiting and kod
+restrict default kod limited nomodify nopeer noquery notrap
+restrict -6 default kod limited nomodify notrap nopeer noquer
+
+restrict 127.0.0.1
+restrict -6 ::1
+ 
+
+# Allow clients in 192.168.0.0/24 to access NTP server
+restrict 192.168.0.0 mask 255.255.255.0 nomodify notrap
+
+# Location of drift file
+driftfile /var/lib/ntp/ntp.drift
+
+

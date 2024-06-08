@@ -37,6 +37,11 @@
         mode: "0640"
       notify: Reload named
 
+    - name: Enable NTP service
+      ansible.builtin.service:
+        name: named
+        state: started
+        enabled: true
 
   handlers:
     - name: Reload named

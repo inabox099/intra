@@ -1,0 +1,29 @@
+---
+- name: Configure remote syslog server
+  hosts: syslog-server
+  become: true
+
+  tasks:
+    - name: Install rsyslog package
+      ansible.builtin.package:
+        name: rsyslog
+        state: present
+
+    - name: Create directory for remote logs
+      ansible.builtin.file:
+        path: /var/log/remote
+        state: directory
+        mode: "0755"
+
+    - name: Configure rsyslog
+      ansible.builtin.template:
+        src: rsyslog-reciver.conf.j2
+        dest: /etc/rsyslog.d/10-reciver.conf
+        mode: "0644"
+      notify: Restart rsyslog
+
+  handlers:
+    - name: Restart rsyslog
+      ansible.builtin.service:
+        name: rsyslog
+        state: restarted

@@ -8,26 +8,18 @@ options {
     // IPv4 will still work:
     //  listen-on-v6 { any; };
     // Add this for no IPv4:
-    //  listen-on { none; };
+    listen-on { any; };
 
-    allow-recursion { 127.0.0.1; };
+    allow-query { any; };
+    allow-recursion { any; };
     allow-transfer { none; };
     allow-update { none; };
+
+    dnssec-validation no;
 
     version none;
     hostname none;
     server-id none;
-
-    dnstap { all; };
-    dnstap-output unix "/var/named/socket/dnstap.sock#";
-};
-
-options {
-        directory "/etc/bind";
-        dnstap { all; };
-        dnstap-output unix "/etc/bind/socket/dnstap.sock#";
-        listen-on-v6 { none; };
-        dnssec-validation no;
 };
 
 
@@ -47,7 +39,7 @@ zone "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa" 
     file "localhost.ip6.zone";
 };
 
-//zone "example.org" IN {
+//zone "beduni.net" IN {
 //    type slave;
 //    file "db.example.com";
 //    masters {

@@ -1,0 +1,29 @@
+---
+- name: Configure remote syslog server
+  hosts: routers
+  become: true
+  gather_facts: false
+
+  tasks:
+
+    - name: Debug Print Variables
+      ansible.builtin.debug:
+        var: hostvars[inventory_hostname]
+
+    - name: Install rsyslog package
+      ansible.builtin.package:
+        name: syslog-ng
+        state: present
+
+    - name: Configure rsyslog
+      ansible.builtin.template:
+        src: syslog-ng.conf.j2
+        dest: /etc/syslog-ng/syslog-ng.conf
+        mode: "0644"
+      notify: Restart rsyslog
+
+  handlers:
+    - name: Restart rsyslog
+      ansible.builtin.service:
+        name: syslog-ng@default
+        state: restarted

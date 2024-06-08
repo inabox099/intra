@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: '{{ target }}'
   become: yes
   vars_files:
     - secrets.yml
@@ -41,3 +41,18 @@
         owner: "{{ service_user }}"
         group: "{{ service_user }}"
         mode: '0600'
+
+    - name: Create system account file on Fedora
+      ansible.builtin.copy:
+        content: "[User]\nSystemAccount=true"
+        dest: "/var/libAccountService/users/ansuer"
+        owner: root
+        group: root
+        mode: '0644'
+      when: ansible_os_family == 'Fedora'
+
+    - name: Enable SSH service
+      ansible.builtin.service:
+        name: sshd
+        state: started
+        enabled: yes

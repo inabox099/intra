@@ -9,13 +9,14 @@
         name: kea
         state: present
 
-#    - name: Copy Kea DHCP configuration file
-#      copy:
-#        src: /path/to/kea.conf
-#        dest: /etc/kea/kea.conf
-#        owner: root
-#        group: root
-#        mode: 0644
+    - name: Configure Kea DHCP4
+      ansible.builtin.template:
+        src: kea-dhcp4.conf.j2
+        dest: /etc/kea/kea-dhcp4.conf
+        owner: root
+        group: named
+        mode: "0644"
+      notify: Restart kea-dhcp4
 
     - name: Start and enable Kea DHCP service
       ansible.builtin.service:
@@ -28,3 +29,9 @@
         name: kea-dhcp-ddns
         state: started
         enabled: true
+
+  handlers:
+    - name: Restart kea-dhcp4
+      ansible.builtin.service:
+        name: kea-dhcp4
+        state: restarted

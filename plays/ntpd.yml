@@ -10,12 +10,25 @@
         state: latest
 
     - name: Synchronize time
-      ansible.builtin.cmd:
+      ansible.builtin.shell:
         cmd: pkill ntpd && ntpdate pool.ntp.org
+      ignore_errors: true
+
+    - name: Configure rsyslog
+      ansible.builtin.template:
+        src: ntp.conf.j2
+        dest: /etc/ntp.conf
+        mode: "0644"
+      notify: Restart ntpd
 
     - name: Enable NTP service
-      service:
-        name: ntp
+      ansible.builtin.service:
+        name: ntpd
         state: started
         enabled: true
 
+  handlers:
+    - name: Restart ntpd
+      ansible.builtin.service:
+        name: ntpd
+        state: restarted

@@ -1,0 +1,23 @@
+---
+- name: Configure remote syslog server
+  hosts: fedora
+  become: true
+
+  tasks:
+    - name: Install rsyslog package
+      ansible.builtin.package:
+        name: rsyslog
+        state: present
+
+    - name: Configure rsyslog
+      ansible.builtin.template:
+        src: rsyslog-forwarder.conf.j2
+        dest: /etc/rsyslog.d/10-forwarder.conf
+        mode: "0644"
+      notify: Restart rsyslog
+
+  handlers:
+    - name: Restart rsyslog
+      ansible.builtin.service:
+        name: rsyslog
+        state: restarted

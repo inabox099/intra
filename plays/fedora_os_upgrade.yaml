@@ -1,6 +1,6 @@
 ---
 - name: Fedora OS Upgrade
-  hosts: fedora
+  hosts: '{{ target }}'
   become: true
 
   tasks:
@@ -32,4 +32,14 @@
           ansible.builtin.command:
             cmd: dnf system-upgrade reboot
 
-      when: current_fedora_release|int() < fedora_release|default(40)
+        - name: Wait until target host is pingable
+          ansible.builtin.wait_for:
+            host: '{{ target }}'
+            port: 22
+            state: started
+            delay: 10
+            timeout: 3600
+
+      when:
+        - current_fedora_release is defined 
+        - current_fedora_release|int() < fedora_release|default(40)

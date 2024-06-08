@@ -2,14 +2,14 @@
 "Dhcp4": {
 
     "interfaces-config": {
-        "interfaces": [ "enp0s8" ]
+        "interfaces": [ "enu1" ]
     },
     "lease-database": {
         "type": "memfile"
     },
 
     "valid-lifetime": 3600, // leases will be valid for 12h
-    "renew-timer": 1800, // clients should renew every 6h
+    "renew-timer": 1800, // clients shoulqd renew every 6h
     "rebind-timer": 2400, // clients should start looking for other servers after 9h
 
     "expired-leases-processing": {
@@ -19,29 +19,11 @@
         "max-reclaim-time": 0
     },
 
-    "client-classes": [
-        {
-            "name": "pxe-boot-clients",
-            "test": "member('bootp.vendor-class-identifier', 'PXEClient')",
-            "option-data": [
-                {
-                    "name": "boot-file-name",
-                    "data": "pxelinux.0",
-                    "client-class": "pxe-boot-clients"
-                },
-                {
-                    "name": "next-server",
-                    "data": "192.168.0.1",
-                    "client-class": "pxe-boot-clients"
-                }
-            ]
-        }
-    ],
-
     "subnet4": [
-        {
+        {   
+            "id": 1,
             "subnet": "192.168.0.0/24",
-            "interface": "enp0s8",
+            "interface": "enu1",
             "pools": [
                 {
                     "pool": "192.168.0.100-192.168.0.199"
@@ -61,12 +43,19 @@
 
             "reservations": [
                 {
-                    "hw-address": "1a:1b:1c:1d:1e:1f",
-                    "ip-address": "192.168.0.10"
+                    // HAL reservation WIFI
+                    "hw-address": "C8:8A:D8:12:65:84",
+                    "ip-address": "192.168.0.51"
                 },
                 {
-                    "client-id": "01:11:22:33:44:55:66",
-                    "ip-address": "192.168.0.11"
+                    // Desktop reservation USB WIFI Adapter
+                    "hw-address": "de:68:ca:74:eb:5a",
+                    "ip-address": "192.168.0.60"
+                },
+                {
+                    // RPI 4 reservation
+                    "hw-address": "D8:3A:DD:0C:F5:2B",
+                    "ip-address": "192.168.0.70"
                 }
             ]
         }
@@ -77,9 +66,7 @@
         "name": "kea-dhcp4",
         "output_options": [
             {
-                "output": "/var/log/kea-dhcp4.log",
-                "maxsize": 2048000,
-                "maxver": 4
+                "output": "syslog"
             }
         ],
         "severity": "INFO",
