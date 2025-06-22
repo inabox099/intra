@@ -1,0 +1,52 @@
+---
+# Tasks for managing user accounts on Linux
+# Expected variable structure:
+# client.users:
+#   - username: admin
+#     comment: "Admin User"
+#     groups: ["wheel", "sudo"]
+#     authorized_keys:
+#       - "ssh-rsa AAAAB3NzaC1yc2E..."
+#     sudo_nopasswd: true
+
+- name: Ensure groups exist
+  ansible.builtin.group:
+    name: "{{ item.group }}"
+    state: present
+  loop: "{{ client.users | default([]) }}"
+  when: item.group is defined
+  tags: users
+
+- name: Create or update user accounts
+  ansible.builtin.user:
+    name: "{{ item.username }}"
+    comment: "{{ item.comment | default(item.username) }}"
+    shell: "{{ item.shell | default('/bin/bash') }}"
+    groups: "{{ item.groups | default(omit) }}"
+    append: "{{ item.append | default(true) }}"
+    password: "{{ item.password | default(omit) }}"
+    update_password: "{{ item.update_password | default('on_create') }}"
+    createhome: "{{ item.createhome | default(true) }}"
+    state: "{{ item.state | default('present') }}"
+    uid: "{{ item.uid | default(omit) }}"
+  loop: "{{ client.users | default([]) }}"
+  when: item.username is defined
+  tags: users
+
+- name: Add authorized SSH keys
+  ansible.posix.authorized_key:
+    user: "{{ item.0.username }}"
+    key: "{{ item.1 }}"
+    state: present
+  loop: "{{ client.users | selectattr('authorized_keys', 'defined') | subelements('authorized_keys') }}"
+  tags: users
+
+- name: Set sudo privileges
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: "/etc/sudoers.d/{{ item.username }}"
+    validate: "visudo -cf %s"
+    mode: "0440"
+  loop: "{{ client.users | default([]) }}"
+  when: item.sudo_nopasswd is defined
+  tags: users

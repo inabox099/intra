@@ -1,0 +1,70 @@
+# This playbook configures the named service for authoritative DNS servers. It sets up the necessary directories
+- name: Set vars
+  ansible.builtin.set_fact:
+    named_zone_dir: "{{ hostvars[inventory_hostname]['named']['named_zone_dir'] }}"
+    named_conf_dir: "{{ hostvars[inventory_hostname]['named']['named_conf_dir'] }}"
+    named_zones: "{{ hostvars[inventory_hostname]['named']['named_zones'] }}"
+    named_ddns_zone: "{{ hostvars[inventory_hostname]['named']['named_ddns_zone'] }}"
+    named_keys: "{{ hostvars[inventory_hostname]['named']['named_keys'] }}"
+    interfaces: "{{ hostvars[inventory_hostname]['interfaces'] }}"
+
+- name: Create directory to store master zones if not exists
+  ansible.builtin.file:
+    path: "{{ named_zone_dir }}/pri"
+    state: directory
+    owner: named
+    group: named
+    mode: "0755"
+
+- name: Create directory to store slave zones if not exists
+  ansible.builtin.file:
+    path: "{{ named_zone_dir }}/sec"
+    state: directory
+    owner: named
+    group: named
+    mode: "0755"
+
+- name: Initialize zone files if they do not exist
+  ansible.builtin.template:
+    src: zone_template.j2
+    dest: "{{ named_zone_dir }}/pri/db.{{ zone }}"
+    owner: root
+    group: root
+    mode: "0666"
+    force: false
+  loop: "{{ named_zones }}"
+  loop_control:
+    loop_var: zone
+
+- name: Configure named
+  ansible.builtin.template:
+    src: named.conf.auth.j2
+    dest: "{{ named_conf_dir }}named.conf"
+    owner: root
+    group: named
+    mode: "0640"
+  notify: Reload named
+
+- name: Configure named logging
+  ansible.builtin.template:
+    src: logging.conf.j2
+    dest: "{{ named_conf_dir }}named.logging.conf"
+    owner: root
+    group: named
+    mode: "0640"
+  notify: Reload named
+
+- name: Configure named tsig
+  ansible.builtin.template:
+    src: tsig.key.j2
+    dest: "{{ named_conf_dir }}named.tsig.conf"
+    owner: root
+    group: named
+    mode: "0640"
+  notify: Reload named
+
+- name: Ensure named service is started and enabled
+  ansible.builtin.service:
+    name: named
+    state: started
+    enabled: true

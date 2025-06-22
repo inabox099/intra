@@ -1,6 +1,6 @@
 ---
 - name: Configure remote syslog server
-  hosts: routers
+  hosts: alarm
   become: true
   gather_facts: false
 

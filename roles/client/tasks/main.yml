@@ -1,0 +1,13 @@
+---
+# tasks file for client
+- name: Import NFS configuration
+  ansible.builtin.include_tasks: nfs.yml
+
+- name: Import package installation tasks
+  ansible.builtin.include_tasks: packages.yml
+
+- name: Import user management tasks
+  ansible.builtin.include_tasks: users.yml
+  loop: "{{ client_user }}"
+  vars:
+    user: "{{ item }}"

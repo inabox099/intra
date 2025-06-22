@@ -1,0 +1,18 @@
+---
+# vars file for kerberos
+kerberos_package: krb5
+kdc_conf_path: /var/lib/krb5kdc/kdc.conf
+kadm5_acl_path: /var/lib/krb5kdc/kadm5.acl
+
+krb_service:
+  - krb5-kdc
+  - krb5-kadmind
+master_db_pass: "password"
+kadmin_pass: "password"
+kadmin_user: admin
+kdc_db_path: /var/lib/krb5kdc/principal
+realm_name: NAMEDI.ORG
+dns_server: "{{ lookup('file', '/etc/resolv.conf').split('\n') | select('match', '^nameserver') | map('regex_replace', '^nameserver\\s+', '') | list | first }}"
+tsig_key_name: ""
+tsig_key_secret: ""
+tsig_key_algorithm: hmac-md5

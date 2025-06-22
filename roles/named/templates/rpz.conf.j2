@@ -1,0 +1,15 @@
+# Response Policy Zone configuration
+options {
+    response-policy {
+    {% for zone in zones %}
+        zone "{{ zone }}.rpz";
+    {% endfor %}
+    };
+};
+
+{% for zone in zones %}
+zone "{{ zone }}" IN {
+    type master;
+    file "rpz/{{ zone }}.db";
+};
+{% endfor %}

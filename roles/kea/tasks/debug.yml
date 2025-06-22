@@ -1,0 +1,28 @@
+---
+- name: Debug Template Output
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Include variables
+      include_vars:
+        dir: ../defaults/
+
+    - name: Print inventory hostname
+      ansible.builtin.debug:
+        var: hostvars
+
+    - name: Render template to a variable
+      ansible.builtin.template:
+        src: ../templates/kea-dhcp4.conf.j2
+        dest: /tmp/kea-dhcp4.conf.j2
+      register: rendered_template
+
+    - name: Debug rendered template content
+      ansible.builtin.debug:
+        var: rendered_template
+
+    - name: Write inventory to file
+      ansible.builtin.copy:
+        content: "{{ hostvars | to_nice_yaml }}"
+        dest: /tmp/inventory.yml

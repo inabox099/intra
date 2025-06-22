@@ -1,0 +1,4 @@
+- name: Reload named
+  ansible.builtin.command: |
+    rndc reload
+  changed_when: false

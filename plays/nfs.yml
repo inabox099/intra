@@ -1,0 +1,45 @@
+---
+- name: Install and manage NFS on Arch Linux
+  hosts: filer
+  become: true
+
+  tasks:
+    - name: Ensure NFS packages are installed
+      community.general.pacman:
+        name:
+          - nfs-utils
+        state: present
+
+    - name: Enable and start NFS services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        enabled: true
+        state: started
+      loop:
+        - nfs-server
+        - rpcbind
+
+    - name: Create export directory
+      ansible.builtin.file:
+        path: /srv/nfs
+        state: directory
+        owner: nfsnobody
+        group: nfsnobody
+        mode: '0755'
+
+    - name: Configure NFS exports
+      ansible.builtin.copy:
+        dest: /etc/exports
+        content: |
+          /srv/nfs        192.168.0.0/24(rw,fsid=root)
+          /srv/nfs/music  192.168.0.0/24(rw,sync)
+          /srv/nfs/home   192.168.0.0/24(rw,sync)
+          /srv/nfs/public 192.168.0.0/24(ro,all_squash,insecure) desktop(rw,sync,all_squash,anonuid=99,anongid=99) # map to user/group - in this case nobody
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Export NFS shares
+      ansible.builtin.command:
+        cmd: exportfs -rav
+      changed_when: false

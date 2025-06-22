@@ -1,0 +1,47 @@
+- name: Set vars
+  ansible.builtin.set_fact:
+    named_zone_dir: "{{ hostvars[inventory_hostname]['named']['named_zone_dir'] }}"
+    named_conf_dir: "{{ hostvars[inventory_hostname]['named']['named_conf_dir'] }}"
+    named_forward: "{{ hostvars[inventory_hostname]['named']['named_forward'] }}"
+    interfaces: "{{ hostvars[inventory_hostname]['interfaces'] }}"
+
+- name: Create named_zone_dir directory if not exists
+  ansible.builtin.file:
+    path: "{{ named_zone_dir }}/rpz"
+    state: directory
+    owner: named
+    group: named
+    mode: "0755"
+
+- name: Download rpz.txt and save as 1host.rpz
+  ansible.builtin.get_url:
+    url: https://o0.pages.dev/Pro/rpz.txt
+    dest: "{{ named_zone_dir }}/rpz/1host.rpz"
+    owner: named
+    group: named
+    mode: "0644"
+  notify: Reload named
+
+- name: Configure named
+  ansible.builtin.template:
+    src: named.conf.recursive.j2
+    dest: "{{ named_conf_dir }}named.conf"
+    owner: root
+    group: named
+    mode: "0640"
+  notify: Reload named
+
+- name: Configure named logging
+  ansible.builtin.template:
+    src: logging.conf.j2
+    dest: "{{ named_conf_dir }}named.logging.conf"
+    owner: root
+    group: named
+    mode: "0640"
+  notify: Reload named
+
+- name: Ensure named service is started and enabled
+  ansible.builtin.service:
+    name: named
+    state: started
+    enabled: true

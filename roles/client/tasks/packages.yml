@@ -1,0 +1,61 @@
+---
+# tasks file for installing and managing packages
+
+# Expected variable structure:
+# client.packages:
+#   common: ["curl", "wget", "vim"]
+#   debian: ["build-essential", "git"]
+#   redhat: ["gcc", "make"]
+#   arch: ["base-devel", "git"]
+#   unwanted: ["snapd", "flatpak"]
+
+- name: Update package cache
+  become: true
+  ansible.builtin.package:
+    update_cache: true
+  tags: [packages, update]
+
+- name: Install common packages
+  become: true
+  ansible.builtin.package:
+    name: "{{ common_packages }}"
+    state: present
+  tags: [packages, common]
+
+- name: Install Debian/Ubuntu specific packages
+  become: true
+  ansible.builtin.apt:
+    name: "{{ debian_packages }}"
+    state: present
+  when: ansible_os_family == "Debian"
+  tags: [packages, debian]
+
+- name: Install RedHat/CentOS specific packages
+  become: true
+  ansible.builtin.yum:
+    name: "{{ redhat_packages }}"
+    state: present
+  when: ansible_os_family == "RedHat"
+  tags: [packages, redhat]
+
+- name: Install Arch Linux specific packages
+  become: true
+  community.general.pacman:
+    name: "{{ arch_packages }}"
+    state: present
+  when: ansible_os_family == "Archlinux"
+  tags: [packages, arch]
+
+- name: Remove unwanted packages
+  become: true
+  ansible.builtin.package:
+    name: "{{ unwanted_packages }}"
+    state: absent
+  tags: [packages, cleanup]
+
+- name: Clean package cache (Debian/Ubuntu)
+  become: true
+  ansible.builtin.apt:
+    autoclean: true
+  when: ansible_os_family == "Debian"
+  tags: [packages, cleanup]

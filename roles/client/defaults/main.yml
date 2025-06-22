@@ -1,0 +1,18 @@
+# This file defines the default variables for the client role in an Ansible playbook.
+# defaults file for client
+
+client_users:
+  - username: "admin"
+    comment: "Admin User"
+    groups: ["wheel", "sudo"]
+    authorized_keys: "{{ admin_ssh_keys | default([]) }}"
+    sudo_nopasswd: true
+
+client_packages:
+  common: ["curl", "wget", "vim"]
+  debian: ["build-essential", "git"]
+  redhat: ["gcc", "make"]
+  arch: ["base-devel", "git"]
+  unwanted: ["snapd", "flatpak"]
+
+client_nfs_exports:

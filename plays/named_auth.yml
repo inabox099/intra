@@ -1,0 +1,9 @@
+---
+- name: Example playbook with import_role
+  hosts: debian
+  become: true  # Use sudo
+
+  tasks:
+    - name: Import the named role
+      ansible.builtin.import_role:
+        name: named

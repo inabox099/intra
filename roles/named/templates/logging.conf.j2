@@ -1,0 +1,34 @@
+logging {
+        channel named           { file "named.log"        versions 10 size 20M; severity info;  print-time iso8601-utc; print-category yes; print-severity yes;};
+        channel security        { file "security.log"     versions 10 size 20M; severity info;  print-time iso8601-utc; print-severity yes; };
+        channel dnssec          { file "dnssec.log"       versions 10 size 20M; severity info;  print-time iso8601-utc; print-severity yes; };
+        channel resolver        { file "resolver.log"     versions 10 size 20M; severity info;  print-time iso8601-utc; print-severity yes; };
+        channel query_log       { file "query.log"        versions 10 size 80M; severity debug; print-time iso8601-utc; print-severity yes; };
+        channel query-error     { file "query-errors.log" versions 10 size 20M; severity info;  print-time iso8601-utc; print-severity yes; };
+        channel lame_servers    { file "lame-servers.log" versions 10 size 20M; severity info;  print-time iso8601-utc; print-severity yes; };
+        channel capacity        { file "capacity.log"     versions 10 size 20M; severity info;  print-time iso8601-utc; print-severity yes; };
+        channel rpz             { file "rpz.log"          versions 10 size 20M; severity info;  print-time iso8601-utc; print-severity yes; };
+
+        category default        { default_syslog;};
+        category general        { default_syslog; };
+        category security       { default_syslog; };
+        category queries        { default_syslog; };
+	    category lame-servers   { default_syslog;};
+        category dnssec         { default_syslog; };
+        category edns-disabled  { default_syslog; };
+        category config         { default_syslog; };
+        category resolver       { default_syslog; };
+        category edns-disabled  { default_syslog; };
+        category cname          { default_syslog; };
+        category serve-stale    { default_syslog; };
+        category spill          { default_syslog; };
+	    category rate-limit     { default_syslog; };
+	    category database       { default_syslog; };
+        category client         { default_syslog; };
+        category network        { default_syslog; };
+        category unmatched      { default_syslog; };
+        category network        { default_syslog; };
+        category dispatch       { default_syslog; };
+        category trust-anchor-telemetry { default_syslog; };
+	    category rpz            { default_syslog;};
+};

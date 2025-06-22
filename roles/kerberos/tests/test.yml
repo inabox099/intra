@@ -1,0 +1,56 @@
+---
+- name: Test Kerberos installation and service
+  hosts: localhost
+  remote_user: root
+  roles:
+    - kerberos
+
+  tasks:
+    - name: Check if Kerberos is installed
+      ansible.builtin.command: which krb5kdc  # noqa no-changed-when
+      register: kerberos_installed
+      ignore_errors: true
+
+    - name: Assert Kerberos is installed
+      ansible.builtin.assert:
+        that:
+          - kerberos_installed.rc == 0
+        fail_msg: "Kerberos is not installed"
+        success_msg: "Kerberos is installed"
+
+    - name: Check if Kerberos service is running
+      ansible.builtin.service:
+        name: krb5kdc
+        state: started
+      register: kerberos_service
+
+    - name: Assert Kerberos service is running
+      ansible.builtin.assert:
+        that:
+          - kerberos_service.state == "started"
+        fail_msg: "Kerberos service is not running"
+        success_msg: "Kerberos service is running"
+
+    - name: Check if DNS records are registered correctly
+      ansible.builtin.command: dig @{{ dns_server }} {{ item.type }} {{ item.record }}.{{ realm_name | upper() }}  # noqa no-changed-when
+      register: dns_lookup
+      ignore_errors: true
+      loop:
+        - { record: 'kerberos', type: 'A', value: '{{ ansible_default_ipv4.address }}' }
+        - { record: '_kerberos', type: 'TXT', value: '"{{ realm_name | upper() }}"' }
+        - { record: '_kerberos._udp', type: 'SRV', value: '0 0 88 kerberos.{{ domain_name }}.' }
+        - { record: '_kerberos-adm._udp', type: 'SRV', value: '0 0 749 kerberos.{{ domain_name }}.' }
+
+    - name: Assert DNS records are registered correctly
+      ansible.builtin.assert:
+        that:
+          - dns_lookup.rc == 0
+        fail_msg: "DNS record {{ item.record }} is not registered correctly"
+        success_msg: "DNS record {{ item.record }} is registered correctly"
+      loop:
+        - { record: 'kerberos', type: 'A', value: '{{ ansible_default_ipv4.address }}' }
+        - { record: '_kerberos', type: 'TXT', value: '"{{ realm_name | upper() }}"' }
+        - { record: '_kerberos._udp', type: 'SRV', value: '0 0 88 kerberos.{{ domain_name }}.' }
+        - { record: '_kerberos-adm._udp', type: 'SRV', value: '0 0 749 kerberos.{{ domain_name }}.' }
+      loop_control:
+        loop_var: item

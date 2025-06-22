@@ -1,0 +1,36 @@
+---
+# tasks file for kea
+- name: Install Kea DHCP packages
+  ansible.builtin.package:
+    name: kea
+    state: present
+
+- name: Configure Kea DHCP4
+  ansible.builtin.template:
+    src: kea-dhcp4.conf.j2
+    dest: /etc/kea/kea-dhcp4.conf
+    owner: root
+    group: named
+    mode: "0644"
+  notify: Restart kea-dhcp4
+
+- name: Configure Kea DHCP4
+  ansible.builtin.template:
+    src: kea-dhcp-ddns.conf.j2
+    dest: kea-dhcp-ddns.conf
+    owner: root
+    group: named
+    mode: "0644"
+  notify: Restart kea-dhcp4
+
+- name: Start and enable Kea DHCP service
+  ansible.builtin.service:
+    name: kea-dhcp4
+    state: started
+    enabled: true
+
+- name: Start and enable Kea DDNS service
+  ansible.builtin.service:
+    name: kea-dhcp-ddns
+    state: started
+    enabled: true

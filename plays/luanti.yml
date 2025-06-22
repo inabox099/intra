@@ -1,0 +1,41 @@
+---
+- name: Install and configure luanti server
+  hosts: srv02.namedi.org
+  become: true
+
+  tasks:
+    - name: Install luanti-server packages
+      ansible.builtin.package:
+        name: luanti-server
+        state: present
+
+    - name: Download game content
+      ansible.builtin.get_url:
+        url: https://content.luanti.org/packages/ryvnf/mineclonia/releases/31399/download/
+        dest: /tmp/luanti-game-content.zip
+        mode: "0644"
+
+    - name: Unzip game content
+      ansible.builtin.unarchive:
+        src: /tmp/luanti-game-content.zip
+        dest: /var/lib/luanti-server/games/
+        remote_src: true
+        mode: "0755"
+
+    - name: Remove downloaded game content zip
+      ansible.builtin.file:
+      
+    - name: Configure luanti-server
+      ansible.builtin.template:
+        src: luanti-server.conf.j2
+        dest: /etc/luanti-server/luanti-server.conf
+        owner: root
+        group: luanti
+        mode: "0644"
+      notify: Restart luanti-server
+    
+    - name: Start and enable luanti-server service
+      ansible.builtin.service:
+        name: luanti-server
+        state: started
+        enabled: true

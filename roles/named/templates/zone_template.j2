@@ -1,0 +1,17 @@
+
+$ORIGIN {{ zone }}.
+$TTL 1h
+@       IN      SOA     ns1.{{ zone }}. admin.{{ zone }}. (
+                        1               ; Serial number
+                        1h              ; Refresh
+                        15m             ; Retry
+                        1w              ; Expire
+                        1h              ; Minimum TTL
+                        )
+
+
+{% for ip in host_ips %}
+                        IN      NS      ns{{ loop.index }}.{{ zone }}.
+ns{{ loop.index }}      IN      A       {{ ip }}
+{% endfor %}
+

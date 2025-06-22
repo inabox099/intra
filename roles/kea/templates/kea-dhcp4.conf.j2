@@ -1,0 +1,88 @@
+{
+"Dhcp4": {
+
+    "interfaces-config": {
+        "interfaces": [
+            {% for subnet in kea_subnets %}
+                "{{ subnet.interface }}"{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    },
+    "lease-database": {
+        "type": "memfile"
+    },
+
+    "valid-lifetime": 3600, // leases will be valid for 1h
+    "renew-timer": 1800, // clients should renew every 30min
+    "rebind-timer": 2400, // clients should start looking for other servers after 45min
+
+    "expired-leases-processing": {
+        "reclaim-timer-wait-time": 3600,
+        "hold-reclaimed-time": 172800,
+        "max-reclaim-leases": 0,
+        "max-reclaim-time": 0
+    },
+    
+    "dhcp-ddns": {
+    "enable-updates": true
+    },
+    
+    "ddns-qualifying-suffix": "namedi.org",
+    "ddns-override-client-update": true,
+    
+    "subnet4": [
+        {% for subnet in kea_subnets %}
+        {
+            "id": {{ subnet.id }},
+            "subnet": "{{ subnet.cidr }}",
+            "interface": "{{ subnet.interface }}",
+            "pools": [
+                {% for pool in subnet.pools %}
+                {
+                    "pool": "{{ pool }}"
+                }{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ],
+            "option-data": [
+                {% for option in subnet.options %}
+                {
+                    "name": "{{ option.name }}",
+                    "data": "{{ option.data }}"
+                }{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ],
+            "reservations": [
+                {% for host in hostvars -%}
+                    {% set interfaces = hostvars[host].interfaces | default([]) -%}
+                    {% for interface in interfaces -%}
+                    {
+                        "hw-address": "{{ interface.hw_address }}",
+                        "ip-address": "{{ interface.ip_address }}"
+                    }
+                    {%- if not loop.last -%},
+                    {% endif -%}
+                    {% endfor %}
+                {% endfor %}
+            
+            ]
+        }
+        {%- if not loop.last %},
+        {% endif -%}
+        {% endfor %}
+    ],
+
+    "loggers": [
+    {
+        "name": "kea-dhcp4",
+        "output_options": [
+            {
+                "output": "syslog"
+            }
+        ],
+        "severity": "INFO",
+        "debuglevel": 0
+    }
+  ]
+}
+}
+

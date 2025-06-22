@@ -1,0 +1,18 @@
+[libdefaults]
+    default_realm = {{ realm_name|upper() }}
+
+[realms]
+    {{ realm_name|upper() }} = {
+        admin_server = kerberos.{{ realm_name|lower() }}
+        kdc = kerberos.{{ realm_name|lower() }}
+        default_principal_flags = +preauth
+    }
+
+[domain_realm]
+    {{ realm_name|lower() }} = {{ realm_name|upper() }}
+    .{{ realm_name|lower() }} = {{ realm_name|upper() }}
+
+[logging]
+    kdc          = SYSLOG:NOTICE
+    admin_server = SYSLOG:NOTICE
+    default      = SYSLOG:NOTICE

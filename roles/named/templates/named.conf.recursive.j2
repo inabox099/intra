@@ -1,0 +1,60 @@
+// vim:set ts=4 sw=4 et:
+
+include "/etc/rndc.key";
+
+options {
+    directory "{{ named_zone_dir }}";
+    pid-file "/run/named/named.pid";
+
+    listen-on { any; };
+
+    allow-query { any; };
+    allow-recursion { any; };
+    allow-transfer { none; };
+    allow-update { none; };
+
+    dnssec-validation no;
+
+    version none;
+    hostname none;
+    server-id none;
+    
+    response-policy {
+        zone  "1host.rpz" policy given;
+    };
+
+};
+
+zone "1host.rpz" {
+        type master;
+        file "/var/named/rpz/1host.rpz";
+};
+
+zone "localhost" IN {
+    type master;
+    file "localhost.zone";
+};
+
+zone "0.0.127.in-addr.arpa" IN {
+    type master;
+    file "127.0.0.zone";
+};
+
+zone "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa" {
+    type master;
+    file "localhost.ip6.zone";
+};
+
+{% for forward in named_forward %}
+zone "{{ forward.zone }}" {
+    type forward;
+    forward {{ forward.forward }};
+    forwarders {
+        {% for forwarder in forward.forwarders %}
+        {{ forwarder }};
+        {% endfor %}
+    };
+};
+{% endfor %}
+
+include "/etc/named.logging.conf";

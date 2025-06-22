@@ -1,0 +1,51 @@
+// vim:set ts=4 sw=4 et:
+{% set zones = named_zones %}
+
+include "/etc/named.tsig.conf";
+include "/etc/rndc.key";
+
+controls {
+      inet 127.0.0.1 port 953
+              allow { 127.0.0.1; } keys { "rndc-key"; };
+};
+
+acl allow_update {
+    192.168.0.0/24;
+    127.0.0.1;
+    key default;
+};
+
+acl allow_transfer {
+    192.168.0.0/24;
+    127.0.0.1;
+    key default;
+};
+
+options {
+    directory "{{ named_zone_dir }}";
+    pid-file "/run/named/named.pid";
+
+    listen-on { any; };
+
+    allow-query { any; };
+    allow-query-cache { any; };
+    allow-recursion { none; };
+    allow-transfer { allow_transfer; };
+    allow-update { allow_update; };
+    
+    recursion no;
+    dnssec-validation no;
+
+    version none;
+    hostname none;
+    server-id none;
+};
+
+{% for zone in zones %}
+zone "{{ zone }}" IN {
+    type master;
+    file "pri/db.{{ zone }}";
+};
+{% endfor %}
+
+include "/etc/named.logging.conf";

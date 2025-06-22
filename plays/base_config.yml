@@ -1,10 +1,18 @@
----
-- hosts: '{{ target }}'
-  become: yes
+- name: Base Configuration
+  hosts: '{{ target | default("localhost") }}'
+  become: true
   vars_files:
-    - secrets.yml
-  
+    - ../secrets.yml
+  vars:
+    service_user: "{{ service_user | default('admin') }}"
+    service_user_password: "{{ service_user_password | default('changeme') }}"
+
   tasks:
+
+    - name: Log all variables
+      ansible.builtin.debug:
+        var: vars
+
     - name: Ensure sudo package is installed.
       ansible.builtin.package:
         name: sudo
@@ -14,9 +22,9 @@
       ansible.builtin.user:
         name: "{{ service_user }}"
         password: "{{ service_user_password | password_hash('sha512') }}"
-        create_home: yes
+        create_home: true
         groups:
-            - "{{ 'sudo' if ansible_os_family == 'Debian' else 'wheel' }}"
+          - "{{ 'sudo' if ansible_os_family == 'Debian' else 'wheel' }}"
 
     - name: Add service_user to sudo configuration
       ansible.builtin.copy:
@@ -42,17 +50,17 @@
         group: "{{ service_user }}"
         mode: '0600'
 
-    - name: Create system account file on Fedora
-      ansible.builtin.copy:
-        content: "[User]\nSystemAccount=true"
-        dest: "/var/libAccountService/users/ansuer"
-        owner: root
-        group: root
-        mode: '0644'
-      when: ansible_os_family == 'Fedora'
-
     - name: Enable SSH service
       ansible.builtin.service:
         name: sshd
         state: started
-        enabled: yes
+        enabled: true
+
+    - name: Disable service_user in Login Manager
+      ansible.builtin.copy:
+        content: "[User]\nSystemAccount=true"
+        dest: "/var/libAccountService/users/{{ service_user }}"
+        owner: root
+        group: root
+        mode: '0644'
+      when: ansible_os_family == 'Fedora'

@@ -1,0 +1,18 @@
+server ntp11.metas.ch
+server ntp12.metas.ch
+server ntp13.metas.ch
+
+leapfile /usr/share/zoneinfo/leap-seconds.list
+
+tos orphan 15
+
+restrict default kod limited nomodify notrap nopeer noquery
+restrict 127.0.0.1
+
+restrict 192.168.0.0 mask 255.255.255.0 
+
+restrict -6 default kod limited nomodify notrap nopeer noquery
+restrict -6 ::1
+
+driftfile /var/lib/ntp/ntp.drift
+logfile /var/log/ntp.log

@@ -1,0 +1,35 @@
+---
+- name: Install NFS client packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - nfs-common  # For Debian/Ubuntu
+    - nfs-utils   # For RedHat/CentOS and ArchLinux
+  register: package_result
+  failed_when:
+    - package_result.failed is defined
+    - package_result.failed
+    - not ('Could not find' in package_result.msg or 'No package' in package_result.msg)
+
+- name: Create mount directory
+  ansible.builtin.file:
+    path: "{{ nfs_mount_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Ensure NFS mount is in fstab
+  ansible.posix.mount:
+    path: "{{ nfs_mount_dir }}"
+    src: "{{ nfs_server }}:{{ nfs_share_path }}"
+    fstype: nfs
+    opts: "{{ nfs_mount_options | default('rw,sync') }}"
+    state: present
+
+- ansible.builtin.name: Mount NFS share
+  ansible.posix.mount:
+    path: "{{ nfs_mount_dir }}"
+    src: "{{ nfs_server }}:{{ nfs_share_path }}"
+    fstype: nfs
+    opts: "{{ nfs_mount_options | default('rw,sync') }}"
+    state: mounted

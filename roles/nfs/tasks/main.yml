@@ -1,0 +1,46 @@
+---
+- name: Install NFS server packages
+  ansible.builtin.package:
+    name: nfs-utils
+    state: present
+
+- name: Ensure NFS service is enabled and started
+  ansible.builtin.service:
+    name: nfs-server
+    state: started
+    enabled: true
+
+- name: Create export directory
+  ansible.builtin.file:
+    path: /srv/nfs
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Configure /etc/exports for minimal NFS export
+  ansible.builtin.copy:
+    dest: /etc/exports
+    content: "/srv/nfs/privat *(rw,sync,no_root_squash)\n"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload NFS exports
+
+- name: Create public shared export directory
+  ansible.builtin.file:
+    path: /srv/nfs/public
+    state: directory
+    owner: nobody
+    group: nogroup
+    mode: '0777'
+
+- name: Add public shared folder to /etc/exports
+  ansible.builtin.lineinfile:
+    path: /etc/exports
+    line: "/srv/nfs/public *(rw,sync,no_root_squash,all_squash,anonuid=65534,anongid=65534)"
+    create: true
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload NFS exports

@@ -1,0 +1,7 @@
+---
+# defaults file for named
+host_ips: "{{ hostvars[inventory_hostname]['ansible_all_ipv4_addresses'] | select('match', '^192\\.168\\..*') | list }}"
+named_zone_dir: "/var/named/"
+named_conf_dir: "/etc/"
+named_zones:
+  - "namedi.org"

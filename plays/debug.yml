@@ -1,0 +1,27 @@
+---
+- name: Print Ansible Inventory
+  hosts: localhost
+  gather_facts: false
+  tasks:
+
+    - name: Print inventory hostname
+      ansible.builtin.debug:
+        var: hostvars
+
+    - name: Set empty list for DNS aliases
+      ansible.builtin.set_fact:
+        all_dns_aliases: []
+
+    - name: Collect DNS aliases from all hosts
+      ansible.builtin.set_fact:
+        all_dns_aliases: "{{ all_dns_aliases + (hostvars[item].dns.dns_alias | default([])) }}"
+      loop: "{{ groups['all'] }}"
+      when: hostvars[item].dns is defined and hostvars[item].dns.dns_alias is defined
+
+    - name: Display all DNS aliases
+      ansible.builtin.debug:
+        var: all_dns_aliases
+
+    - name: Count total DNS aliases
+      ansible.builtin.debug:
+        msg: "Total DNS aliases found: {{ all_dns_aliases | length }}"

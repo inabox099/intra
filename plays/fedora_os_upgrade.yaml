@@ -1,6 +1,6 @@
 ---
 - name: Fedora OS Upgrade
-  hosts: '{{ target }}'
+  hosts: '{{ target|default("localhost") }}'
   become: true
 
   tasks:
@@ -41,5 +41,6 @@
             timeout: 3600
 
       when:
-        - current_fedora_release is defined 
-        - current_fedora_release|int() < fedora_release|default(40)
+        - current_fedora_release is defined
+        - current_fedora_release|int() < fedora_release|default(40)|int()
+

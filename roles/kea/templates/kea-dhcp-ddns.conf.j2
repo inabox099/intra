@@ -1,0 +1,53 @@
+{
+"DhcpDdns": 
+{
+    "ip-address": "127.0.0.1",
+    "port": 53001,
+    
+    "tsig-keys": [
+            {
+            "name": "default",
+            "algorithm": "HMAC-MD5",
+            "secret": "LSWXnfkKZjdPJI5QxlpnfQ=="
+        }
+    ],
+    "forward-ddns": {
+        "ddns-domains": [
+                    {
+                "name": "namedi.org.",
+                "key-name": "default",
+                "dns-servers": [
+                    {
+                        "ip-address": "192.168.0.70",
+                        "port": 53
+                    }
+                ]
+            }
+        ]
+    },
+    "reverse-ddns": {
+        "ddns-domains": [
+                    {
+                "name": "0.192.in-addr.arpa.",
+                "key-name": "default",
+                "dns-servers": [
+                    { "ip-address": "192.168.0.70" }
+                ]
+            }
+        ]
+    },
+    "loggers": [
+        {
+            "name": "kea-dhcp-ddns",
+            "output_options": [
+                {
+                    "output": "syslog",
+                    "pattern": "%-5p %m\n"
+                }
+            ],
+            "severity": "INFO",
+            "debuglevel": 1
+        }
+      ]
+}
+}

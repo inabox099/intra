@@ -28,6 +28,15 @@
         group: named
         mode: "0770"
 
+    - name: Configure named
+      ansible.builtin.template:
+        src: named.conf.j2
+        dest: /var/named/db.aduri.ch
+        owner: named
+        group: named
+        mode: "0640"
+      notify: Reload named
+
     - name: Update root hints
       ansible.builtin.get_url:
         url: "ftp://ftp.rs.internic.net/domain/db.cache"

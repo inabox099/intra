@@ -15,6 +15,8 @@ options {
     allow-transfer { none; };
     allow-update { none; };
 
+    filter-aaaa-on-v4 yes;
+
     dnssec-validation no;
 
     version none;
@@ -39,7 +41,7 @@ zone "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa" 
     file "localhost.ip6.zone";
 };
 
-//zone "beduni.net" IN {
+//zone "aduri.net" IN {
 //    type slave;
 //    file "db.example.com";
 //    masters {

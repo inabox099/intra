@@ -1,0 +1,31 @@
+- name: Ensure requirements in place
+  ansible.builtin.package:
+    name:
+      - bind
+    state: present
+  become: true
+
+- name: Genereate rndc key
+  ansible.builtin.command:
+    cmd: "rndc-confgen -a -u named"
+    creates: "/etc/rndc.key"
+  become: true
+
+- name: Create named_zone_dir directory if not exists
+  ansible.builtin.file:
+    path: "{{ named_zone_dir }}"
+    state: directory
+    owner: named
+    group: named
+    mode: "0755"
+
+- name: Update root hints
+  ansible.builtin.get_url:
+    url: "ftp://ftp.rs.internic.net/domain/db.cache"
+    dest: "/var/named/db.cache"
+    owner: named
+    group: named
+    mode: "0640"
+  notify: Reload named
+
+...

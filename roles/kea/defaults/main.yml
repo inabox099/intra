@@ -1,0 +1,19 @@
+---
+# defaults file for kea
+
+kea_subnets:
+  - id: 1
+    name: "privat_lan"
+    interface: ens192
+    cidr: 192.168.0.0/24
+    pools:
+      - 192.168.0.100-192.168.254
+    options:
+      - name: routers
+        data: 192.168.0.1
+      - name: domain-name-servers
+        data: 192.168.0.50
+      - name: domain-name
+        data: namedi.org
+      - name: ntp-servers
+        data: ntp.namedi.org

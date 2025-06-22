@@ -1,0 +1,37 @@
+---
+- name: Print Ansible Inventory
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Set facts
+      ansible.builtin.set_fact:
+        ddns_zone: "{{ ddns['zone'] }}"
+        dns_server: "{{ nameserver }}"
+        tsig_key_name: "{{ ddns['tsig_key_name'] }}"
+        tsig_key_secret: "{{ ddns['tsig_secret'] }}"
+        tsig_key_algorithm: "{{ ddns['tsig_algorithm'] }}"
+      when: ddns is defined
+
+    - name: Print inventory hostname
+      ansible.builtin.debug:
+        var: hostvars
+
+    - name: Register DNS records
+      community.general.nsupdate:
+        server: "{{ dns_server }}"
+        zone: "{{ ddns_zone }}"
+        record: "{{ item.record }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+        ttl: 3600
+        key_name: "{{ tsig_key_name }}"
+        key_secret: "{{ tsig_key_secret }}"
+        key_algorithm: "{{ tsig_key_algorithm }}"
+      loop:
+        - { record: 'kerberos', type: 'A', value: '{{ kerberos["server"] }}' }
+        - { record: '_kerberos', type: 'TXT', value: '"{{ kerberos["realm_name"] | upper() }}"' }
+        - { record: '_kerberos._udp', type: 'SRV', value: '0 0 88 kerberos.{{ kerberos["realm_name"] | lower() }}.' }
+        - { record: '_kerberos-adm._udp', type: 'SRV', value: '0 0 749 kerberos.{{ kerberos["realm_name"] | lower() }}.' }
+        - { record: '_kpasswd._udp', type: 'SRV', value: '0 0 464 kerberos.{{ kerberos["realm_name"] | lower() }}.' }
+        - { record: '{{ ntp["pool"].rstrip("namedi.org") }}', type: 'A', value: '{{ ntp["server"] }}' }

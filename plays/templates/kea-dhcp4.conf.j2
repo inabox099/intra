@@ -8,9 +8,9 @@
         "type": "memfile"
     },
 
-    "valid-lifetime": 3600, // leases will be valid for 12h
-    "renew-timer": 1800, // clients shoulqd renew every 6h
-    "rebind-timer": 2400, // clients should start looking for other servers after 9h
+    "valid-lifetime": 3600, // leases will be valid for 1h
+    "renew-timer": 1800, // clients shoulqd renew every 30min
+    "rebind-timer": 2400, // clients should start looking for other servers after 45min
 
     "expired-leases-processing": {
         "reclaim-timer-wait-time": 3600,
@@ -38,7 +38,14 @@
                 {
                     "name": "domain-name-servers",
                     "data": "192.168.0.50"
-                }
+                },
+                {
+                    "name": "domain-name",
+                    "data": "namedi.org"
+                },
+                {
+                    "name": "ntp-servers",
+                    "data": "pool.ntp.org"
             ],
 
             "reservations": [
@@ -48,9 +55,19 @@
                     "ip-address": "192.168.0.51"
                 },
                 {
+                    // HAL reservation LAN1
+                    "hw-address": "c0:74:2b:fe:6e:48",
+                    "ip-address": "192.168.0.52"
+                },
+                {
                     // Desktop reservation USB WIFI Adapter
                     "hw-address": "de:68:ca:74:eb:5a",
                     "ip-address": "192.168.0.60"
+                },
+                {
+                    // MacBook reservation internal adapter
+                    "hw-address": "6c:40:08:b0:ba:42",
+                    "ip-address": "192.168.0.61"
                 },
                 {
                     // RPI 4 reservation

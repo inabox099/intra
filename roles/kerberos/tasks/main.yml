@@ -1,0 +1,56 @@
+- name: Make sure we have the entry for hostname in /etc/hosts
+  ansible.builtin.lineinfile:
+    state: present
+    dest: /etc/hosts
+    regexp: '.*{{ ansible_default_ipv4.address }}\s*{{ ansible_hostname }}\s*{{ ansible_hostname }}.{{ realm_name | lower() }}'
+    line: '{{ ansible_default_ipv4.address }} {{ ansible_hostname }} {{ ansible_hostname }}.{{ realm_name | lower() }}'
+    unsafe_writes: true
+
+
+- name: Install needed Kerberos packages # noqa package-latest
+  ansible.builtin.package:
+    name: "{{ kerberos_package }}"
+    state: latest
+
+
+- name: Copy KDC configuration file
+  ansible.builtin.template:
+    src: kdc.conf.j2
+    dest: "{{ kdc_conf_path }}"
+    mode: '0644'
+  notify:
+    - restart kerberos
+
+- name: Copy KDC ACL configuration file
+  ansible.builtin.template:
+    src: kadm5.acl.j2
+    dest: "{{ kadm5_acl_path }}"
+    mode: '0644'
+  notify:
+    - restart kerberos
+
+- name: Copy client configuration file
+  ansible.builtin.template:
+    src: krb5.conf.j2
+    dest: /etc/krb5.conf
+    mode: '0644'
+
+- name: Check if Kerberos database file exists
+  ansible.builtin.stat:
+    path: "{{ kdc_db_path }}"
+  register: kdc_db_file
+
+- name: Create initial Kerberos database
+  ansible.builtin.command: kdb5_util -P {{ master_db_pass }} create -s # noqa no-changed-when
+  when: not kdc_db_file.stat.exists
+
+- name: Start Kerberos services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ krb_service }}"
+
+- name: Create an admin for administering Kerberos server
+  ansible.builtin.command: kadmin.local -q "addprinc -pw {{ kadmin_pass }} {{ kadmin_user }}/admin" # noqa no-changed-when
+  when: not kdc_db_file.stat.exists
