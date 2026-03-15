@@ -59,8 +59,8 @@
     - name: Disable service_user in Login Manager
       ansible.builtin.copy:
         content: "[User]\nSystemAccount=true"
-        dest: "/var/libAccountService/users/{{ service_user }}"
+        dest: "/var/lib/AccountsService/users/{{ service_user }}"
         owner: root
         group: root
         mode: '0644'
-      when: ansible_os_family == 'Fedora'
+      when: ansible_os_family == 'RedHat'

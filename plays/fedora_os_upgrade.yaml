@@ -26,11 +26,12 @@
 
         - name: Download Fedora release
           ansible.builtin.command:
-            cmd: dnf system-upgrade download --releasever={{ fedora_release|default(40) }} -y --allowerasing
-
+            cmd: dnf system-upgrade download --releasever={{ fedora_release|default(43) }} -y --allowerasing
+          register: my_output # <- Registers the command output.
+                changed_when: my_output.rc != 0 # <- Uses the return code to define when the task has changed.
         - name: System Upgrade reboot
           ansible.builtin.command:
-            cmd: dnf system-upgrade reboot
+            cmd: dnf system-upgrade reboot -y
 
         - name: Wait until target host is pingable
           ansible.builtin.wait_for:
@@ -42,5 +43,4 @@
 
       when:
         - current_fedora_release is defined
-        - current_fedora_release|int() < fedora_release|default(40)|int()
-
+        - current_fedora_release|int() < fedora_release|default(43)|int()

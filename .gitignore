@@ -2,8 +2,13 @@ inventory
 vault.yml
 vault-password-file
 secrets.yml
-.vscode/
+
 *.tfstate
 *.backup
 *.hcl
 .terraform/
+
+_old/
+data/
+.venv/
+.vscode/

@@ -1,15 +1,20 @@
 {
 "Dhcp4": {
+    "control-socket": {
+        "socket-type": "unix",
+        "socket-name": "/run/kea/kea4-ctrl-socket"
+    },
 
     "interfaces-config": {
         "interfaces": [ "enu1" ]
     },
+
     "lease-database": {
         "type": "memfile"
     },
 
     "valid-lifetime": 3600, // leases will be valid for 1h
-    "renew-timer": 1800, // clients shoulqd renew every 30min
+    "renew-timer": 1800, // clients should renew every 30min
     "rebind-timer": 2400, // clients should start looking for other servers after 45min
 
     "expired-leases-processing": {

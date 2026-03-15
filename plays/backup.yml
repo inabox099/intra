@@ -1,0 +1,32 @@
+---
+- name: Setup backup script and register job
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Copy backup script to /usr/local/bin
+      copy:
+        src: files/rbackup.sh
+        dest: /usr/local/bin/rbackup.sh
+        mode: '0755'
+
+    - name: Create systemd service for backup script
+      copy:
+        dest: /etc/systemd/system/rbackup.service
+        content: |
+          [Unit]
+          Description=Run backup script at startup
+          After=network.target
+
+          [Service]
+          ExecStart=/usr/local/bin/rbackup.sh
+          Type=oneshot
+          RemainAfterExit=true
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Enable and start the backup service
+      systemd:
+        name: rbackup.service
+        enabled: yes
+        state: started
